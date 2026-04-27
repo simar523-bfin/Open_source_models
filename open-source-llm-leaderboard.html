@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Source LLM Leaderboard 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ==================== TOKENS ==================== */
+:root, [data-theme="light"] {
+  --color-bg: #f7f6f2;
+  --color-surface: #f9f8f5;
+  --color-surface-2: #fbfbf9;
+  --color-surface-offset: #f0ede8;
+  --color-surface-dynamic: #e6e4df;
+  --color-divider: #dcd9d5;
+  --color-border: #d4d1ca;
+  --color-text: #1a1916;
+  --color-text-muted: #6b6a66;
+  --color-text-faint: #b0afa9;
+  --color-text-inverse: #f9f8f4;
+  --color-primary: #01696f;
+  --color-primary-hover: #0c4e54;
+  --color-primary-glow: rgba(1,105,111,0.15);
+  --color-secondary: #d19900;
+  --color-accent-blue: #006494;
+  --color-accent-purple: #7a39bb;
+  --color-success: #437a22;
+  --color-success-bg: #d4dfcc;
+  --color-warning: #964219;
+  --color-warning-bg: #eddcc6;
+  --color-error: #a12c7b;
+  --color-error-bg: #e0ced7;
+  --color-s-tier: #01696f;
+  --color-a-tier: #006494;
+  --color-b-tier: #7a39bb;
+  --color-c-tier: #7a7974;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+  --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+  --space-12: 3rem; --space-16: 4rem;
+  --sidebar-w: 240px;
+  --topbar-h: 60px;
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] {
+  --color-bg: #0e0e0d;
+  --color-surface: #141413;
+  --color-surface-2: #1a1918;
+  --color-surface-offset: #1f1e1c;
+  --color-surface-dynamic: #272624;
+  --color-divider: #252422;
+  --color-border: #2e2d2b;
+  --color-text: #d9d8d4;
+  --color-text-muted: #7a7974;
+  --color-text-faint: #4d4c49;
+  --color-text-inverse: #1a1916;
+  --color-primary: #3fa8b0;
+  --color-primary-hover: #5abec6;
+  --color-primary-glow: rgba(63,168,176,0.15);
+  --color-secondary: #e8af34;
+  --color-accent-blue: #5591c7;
+  --color-accent-purple: #a86fdf;
+  --color-success: #6daa45;
+  --color-success-bg: #1e3318;
+  --color-warning: #e08040;
+  --color-warning-bg: #3a2a1a;
+  --color-error: #d163a7;
+  --color-error-bg: #2e1828;
+  --color-s-tier: #3fa8b0;
+  --color-a-tier: #5591c7;
+  --color-b-tier: #a86fdf;
+  --color-c-tier: #7a7974;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
+}
+
+/* ==================== BASE ==================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-bg);
+  min-height: 100dvh;
+  display: flex;
+  transition: background var(--transition), color var(--transition);
+}
+button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
+a { text-decoration: none; color: inherit; }
+table { border-collapse: collapse; width: 100%; }
+
+/* ==================== SIDEBAR ==================== */
+.sidebar {
+  width: var(--sidebar-w);
+  min-height: 100dvh;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+  transition: transform var(--transition), background var(--transition);
+}
+
+.sidebar-logo {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--topbar-h);
+}
+
+.logo-icon {
+  width: 32px; height: 32px;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+.logo-text span { color: var(--color-primary); }
+.logo-sub { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 400; }
+
+.sidebar-nav { padding: var(--space-4) var(--space-3); flex: 1; }
+.nav-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  margin-top: var(--space-4);
+}
+.nav-label:first-child { margin-top: 0; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.nav-item.active {
+  background: color-mix(in oklch, var(--color-primary) 12%, var(--color-surface));
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.sidebar-footer {
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.update-badge {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+}
+.update-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+  margin-right: 5px;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* ==================== MAIN LAYOUT ==================== */
+.main-area {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* ==================== TOPBAR ==================== */
+.topbar {
+  height: var(--topbar-h);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  position: sticky;
+  top: 0; z-index: 50;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.page-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.search-wrap {
+  position: relative;
+}
+.search-wrap input {
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-8);
+  font-size: var(--text-xs);
+  color: var(--color-text);
+  width: 200px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.search-wrap input::placeholder { color: var(--color-text-faint); }
+.search-wrap input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+  background: var(--color-surface-2);
+}
+.search-icon {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%; transform: translateY(-50%);
+  color: var(--color-text-faint);
+  width: 14px; height: 14px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.theme-toggle {
+  width: 34px; height: 34px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  transition: all var(--transition);
+}
+.theme-toggle:hover { color: var(--color-text); background: var(--color-surface-dynamic); }
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  transition: background var(--transition);
+}
+.btn-primary:hover { background: var(--color-primary-hover); }
+
+/* ==================== CONTENT ==================== */
+.content {
+  padding: var(--space-6);
+  flex: 1;
+  max-width: 1280px;
+}
+
+/* View sections */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ==================== KPI CARDS ==================== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.kpi-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition), transform var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--kpi-accent, var(--color-primary));
+}
+.kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+.kpi-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-2);
+}
+.kpi-value {
+  font-size: clamp(1.4rem, 2vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+  line-height: 1;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
+}
+.kpi-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+}
+.kpi-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  margin-left: var(--space-2);
+  vertical-align: middle;
+}
+.badge-green { background: var(--color-success-bg); color: var(--color-success); }
+.badge-yellow { background: var(--color-warning-bg); color: var(--color-warning); }
+
+/* ==================== SECTION HEADER ==================== */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.section-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.section-meta { font-size: var(--text-xs); color: var(--color-text-muted); }
+
+/* ==================== FILTER BAR ==================== */
+.filter-bar {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.filter-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 500; margin-right: var(--space-1); }
+.chip {
+  font-size: var(--text-xs);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-offset);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-weight: 500;
+}
+.chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.chip.active {
+  background: color-mix(in oklch, var(--color-primary) 15%, var(--color-surface));
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.chip.tier-s.active { background: color-mix(in oklch, var(--color-s-tier) 15%, var(--color-surface)); border-color: var(--color-s-tier); color: var(--color-s-tier); }
+.chip.tier-a.active { background: color-mix(in oklch, var(--color-a-tier) 15%, var(--color-surface)); border-color: var(--color-a-tier); color: var(--color-a-tier); }
+.chip.tier-b.active { background: color-mix(in oklch, var(--color-b-tier) 15%, var(--color-surface)); border-color: var(--color-b-tier); color: var(--color-b-tier); }
+.separator { width: 1px; height: 16px; background: var(--color-border); margin: 0 var(--space-1); }
+
+/* ==================== TABLE ==================== */
+.table-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+
+.leaderboard-table {
+  min-width: 900px;
+}
+.leaderboard-table thead {
+  background: var(--color-surface-offset);
+  border-bottom: 1px solid var(--color-border);
+}
+.leaderboard-table th {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition);
+}
+.leaderboard-table th:hover { color: var(--color-text); }
+.leaderboard-table th.sorted { color: var(--color-primary); }
+.sort-arrow { margin-left: 4px; opacity: 0.5; }
+.sort-arrow.active { opacity: 1; }
+
+.leaderboard-table td {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-xs);
+  border-bottom: 1px solid var(--color-divider);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.leaderboard-table tr:last-child td { border-bottom: none; }
+.leaderboard-table tbody tr {
+  transition: background var(--transition);
+}
+.leaderboard-table tbody tr:hover { background: var(--color-surface-offset); }
+.leaderboard-table tbody tr.hidden-row { display: none; }
+
+/* Rank cell */
+.rank-cell {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-text-faint);
+  width: 40px;
+  text-align: center;
+}
+.rank-1 { color: #ffd700; }
+.rank-2 { color: #c0c0c0; }
+.rank-3 { color: #cd7f32; }
+
+/* Model cell */
+.model-cell { min-width: 180px; }
+.model-name {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: var(--text-xs);
+}
+.model-org {
+  font-size: 0.68rem;
+  color: var(--color-text-faint);
+  margin-top: 2px;
+}
+.model-params {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-primary);
+  margin-top: 2px;
+}
+
+/* Tier badge */
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.03em;
+}
+.tier-S { background: color-mix(in oklch, var(--color-s-tier) 18%, transparent); color: var(--color-s-tier); border: 1px solid color-mix(in oklch, var(--color-s-tier) 30%, transparent); }
+.tier-A { background: color-mix(in oklch, var(--color-a-tier) 18%, transparent); color: var(--color-a-tier); border: 1px solid color-mix(in oklch, var(--color-a-tier) 30%, transparent); }
+.tier-B { background: color-mix(in oklch, var(--color-b-tier) 18%, transparent); color: var(--color-b-tier); border: 1px solid color-mix(in oklch, var(--color-b-tier) 30%, transparent); }
+.tier-C { background: color-mix(in oklch, var(--color-c-tier) 18%, transparent); color: var(--color-c-tier); border: 1px solid color-mix(in oklch, var(--color-c-tier) 30%, transparent); }
+
+/* Score cells */
+.score-cell { font-family: var(--font-mono); font-weight: 500; text-align: right; }
+.score-high { color: var(--color-success); }
+.score-mid { color: var(--color-secondary); }
+.score-low { color: var(--color-text-muted); }
+.score-na { color: var(--color-text-faint); }
+
+/* Mini bar inside cell */
+.mini-bar-wrap { display: flex; align-items: center; gap: var(--space-2); }
+.mini-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-surface-dynamic);
+  min-width: 50px;
+  overflow: hidden;
+}
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--color-primary);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* License pill */
+.license-pill {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.04em;
+}
+.license-open { background: var(--color-success-bg); color: var(--color-success); }
+.license-restrictive { background: var(--color-warning-bg); color: var(--color-warning); }
+.license-mit { background: color-mix(in oklch, var(--color-accent-blue) 15%, transparent); color: var(--color-accent-blue); }
+
+/* ==================== BENCHMARK CARDS ==================== */
+.bench-section { margin-top: var(--space-8); }
+.bench-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-5);
+}
+.bench-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+.bench-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+.bench-card-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.bench-card-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.bench-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklch, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+/* Horizontal bar chart in bench card */
+.bar-list { display: flex; flex-direction: column; gap: var(--space-2); }
+.bar-item { display: flex; align-items: center; gap: var(--space-2); }
+.bar-model-name { font-size: 0.68rem; color: var(--color-text-muted); width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { flex: 1; height: 8px; background: var(--color-surface-dynamic); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+.bar-score { font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-text); font-weight: 600; width: 38px; text-align: right; }
+
+/* ==================== CHARTS PAGE ==================== */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+.chart-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+.chart-card.full-width { grid-column: 1 / -1; }
+.chart-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+.chart-sub { font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-4); }
+
+/* ==================== SPEED/COST PAGE ==================== */
+.speed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+.speed-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.speed-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.speed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
+.speed-model-name { font-weight: 600; font-size: var(--text-xs); }
+.speed-model-org { font-size: 0.65rem; color: var(--color-text-faint); }
+.speed-row { display: flex; align-items: center; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px solid var(--color-divider); }
+.speed-row:last-child { border-bottom: none; }
+.speed-key { font-size: var(--text-xs); color: var(--color-text-muted); }
+.speed-val { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; color: var(--color-text); }
+.speed-val.highlight { color: var(--color-primary); }
+
+/* ==================== ABOUT PAGE ==================== */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+.about-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+.about-card h3 { font-size: var(--text-sm); font-weight: 700; margin-bottom: var(--space-3); }
+.about-card p { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.7; margin-bottom: var(--space-3); }
+.about-card ul { list-style: none; }
+.about-card li { font-size: var(--text-xs); color: var(--color-text-muted); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-divider); display: flex; gap: var(--space-3); align-items: flex-start; }
+.about-card li:last-child { border-bottom: none; }
+.about-card li strong { color: var(--color-text); font-weight: 600; min-width: 100px; flex-shrink: 0; }
+
+/* ==================== SCROLLBAR ==================== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-area { margin-left: 0; }
+  .charts-grid { grid-template-columns: 1fr; }
+  .about-grid { grid-template-columns: 1fr; }
+  .mobile-menu-btn { display: flex; }
+}
+
+.mobile-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeInUp 0.3s ease forwards; }
+
+.view.active .kpi-card:nth-child(1) { animation: fadeInUp 0.3s 0.05s both; }
+.view.active .kpi-card:nth-child(2) { animation: fadeInUp 0.3s 0.1s both; }
+.view.active .kpi-card:nth-child(3) { animation: fadeInUp 0.3s 0.15s both; }
+.view.active .kpi-card:nth-child(4) { animation: fadeInUp 0.3s 0.2s both; }
+.view.active .kpi-card:nth-child(5) { animation: fadeInUp 0.3s 0.25s both; }
+</style>
+</head>
+<body>
+
+<!-- ====== SIDEBAR ====== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="OSS Leaderboard Logo">
+      <rect width="32" height="32" rx="8" fill="currentColor" opacity="0.1"/>
+      <path d="M8 22L14 10L20 18L24 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="24" cy="14" r="2.5" fill="var(--color-primary)"/>
+      <circle cx="14" cy="10" r="2" fill="var(--color-secondary)"/>
+      <path d="M5 26h22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+    <div>
+      <div class="logo-text">OSS <span>Leaderboard</span></div>
+      <div class="logo-sub">April 2026 Edition</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" data-view="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" data-view="leaderboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 18V10m4 8V6m4 12v-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      Full Leaderboard
+    </div>
+    <div class="nav-label">Analysis</div>
+    <div class="nav-item" data-view="benchmarks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Benchmarks
+    </div>
+    <div class="nav-item" data-view="charts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Radar Charts
+    </div>
+    <div class="nav-item" data-view="speed">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Speed & Cost
+    </div>
+    <div class="nav-label">Info</div>
+    <div class="nav-item" data-view="about">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Benchmark Guide
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="update-badge"><span class="update-dot"></span>Updated Apr 27, 2026</div>
+  </div>
+</aside>
+
+<!-- ====== MAIN AREA ====== -->
+<div class="main-area">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenu" aria-label="Toggle menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="page-title" id="pageTitle">Dashboard</span>
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="globalSearch" placeholder="Search models..." aria-label="Search models">
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" id="themeToggle" data-theme-toggle aria-label="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="btn-primary" onclick="exportCSV()">↓ Export CSV</button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- ===== DASHBOARD VIEW ===== -->
+    <div class="view active" id="view-dashboard">
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--kpi-accent: var(--color-primary)">
+          <div class="kpi-label">Models Tracked</div>
+          <div class="kpi-value">15</div>
+          <div class="kpi-sub">Open-weight & open-source</div>
+        </div>
+        <div class="kpi-card" style="--kpi-accent: var(--color-secondary)">
+          <div class="kpi-label">Top Arena ELO</div>
+          <div class="kpi-value">1451<span class="kpi-badge badge-green">S</span></div>
+          <div class="kpi-sub">GLM-5 · Zhipu AI</div>
+        </div>
+        <div class="kpi-card" style="--kpi-accent: var(--color-success)">
+          <div class="kpi-label">Best HumanEval</div>
+          <div class="kpi-value">99.0%</div>
+          <div class="kpi-sub">Kimi K2.5 · Moonshot AI</div>
+        </div>
+        <div class="kpi-card" style="--kpi-accent: var(--color-accent-blue)">
+          <div class="kpi-label">Best GPQA Diamond</div>
+          <div class="kpi-value">88.4%</div>
+          <div class="kpi-sub">Qwen 3.5 · Alibaba</div>
+        </div>
+        <div class="kpi-card" style="--kpi-accent: var(--color-accent-purple)">
+          <div class="kpi-label">Best SWE-bench</div>
+          <div class="kpi-value">80.2%</div>
+          <div class="kpi-sub">MiniMax M2.5 · MiniMax</div>
+        </div>
+      </div>
+
+      <!-- Top 5 quick table -->
+      <div class="section-header">
+        <div>
+          <div class="section-title">🏆 Top 5 Models — Overall</div>
+          <div class="section-meta">Ranked by Chatbot Arena ELO (human preference signal)</div>
+        </div>
+        <div class="section-meta" style="cursor:pointer;color:var(--color-primary)" onclick="switchView('leaderboard')">View all →</div>
+      </div>
+      <div class="table-wrap" style="margin-bottom: var(--space-8)">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Model</th>
+              <th>Tier</th>
+              <th>Arena ELO</th>
+              <th>HumanEval</th>
+              <th>GPQA ◆</th>
+              <th>AIME 2025</th>
+              <th>SWE-bench</th>
+              <th>Context</th>
+              <th>License</th>
+            </tr>
+          </thead>
+          <tbody id="top5tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Benchmark category winners -->
+      <div class="section-header">
+        <div class="section-title">🎯 Category Leaders</div>
+        <div class="section-meta">Best model per benchmark</div>
+      </div>
+      <div class="bench-grid" id="categoryLeaders"></div>
+    </div>
+
+    <!-- ===== LEADERBOARD VIEW ===== -->
+    <div class="view" id="view-leaderboard">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Full Leaderboard</div>
+          <div class="section-meta">15 models · 9 benchmarks tracked · April 2026</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="filter-label">Tier:</span>
+        <button class="chip active" data-filter="tier" data-value="all">All</button>
+        <button class="chip tier-s" data-filter="tier" data-value="S">S-Tier</button>
+        <button class="chip tier-a" data-filter="tier" data-value="A">A-Tier</button>
+        <button class="chip tier-b" data-filter="tier" data-value="B">B-Tier</button>
+        <div class="separator"></div>
+        <span class="filter-label">Org:</span>
+        <button class="chip active" data-filter="org" data-value="all">All</button>
+        <button class="chip" data-filter="org" data-value="Moonshot">Moonshot</button>
+        <button class="chip" data-filter="org" data-value="Zhipu">Zhipu</button>
+        <button class="chip" data-filter="org" data-value="Alibaba">Alibaba</button>
+        <button class="chip" data-filter="org" data-value="DeepSeek">DeepSeek</button>
+        <button class="chip" data-filter="org" data-value="Meta">Meta</button>
+        <button class="chip" data-filter="org" data-value="Google">Google</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="leaderboard-table" id="mainTable">
+          <thead>
+            <tr>
+              <th class="rank-cell">#</th>
+              <th data-sort="name">Model <span class="sort-arrow">↕</span></th>
+              <th>Tier</th>
+              <th data-sort="arena">Arena ELO <span class="sort-arrow">↕</span></th>
+              <th data-sort="humaneval">HumanEval <span class="sort-arrow">↕</span></th>
+              <th data-sort="gpqa">GPQA ◆ <span class="sort-arrow">↕</span></th>
+              <th data-sort="aime">AIME 2025 <span class="sort-arrow">↕</span></th>
+              <th data-sort="swe">SWE-bench <span class="sort-arrow">↕</span></th>
+              <th data-sort="math">MATH-500 <span class="sort-arrow">↕</span></th>
+              <th data-sort="livecode">LiveCode <span class="sort-arrow">↕</span></th>
+              <th>Context</th>
+              <th>License</th>
+            </tr>
+          </thead>
+          <tbody id="mainTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== BENCHMARKS VIEW ===== -->
+    <div class="view" id="view-benchmarks">
+      <div class="section-header">
+        <div class="section-title">Benchmark Breakdown</div>
+        <div class="section-meta">Top 5 per benchmark category</div>
+      </div>
+      <div class="bench-grid" id="benchmarkCards"></div>
+    </div>
+
+    <!-- ===== CHARTS VIEW ===== -->
+    <div class="view" id="view-charts">
+      <div class="section-header">
+        <div class="section-title">Performance Charts</div>
+        <div class="section-meta">Visual comparison across benchmarks</div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">Reasoning vs Coding</div>
+          <div class="chart-sub">GPQA Diamond vs HumanEval — top 10 models</div>
+          <canvas id="scatterChart" height="260"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Arena ELO Rankings</div>
+          <div class="chart-sub">Human preference ratings (top 10 models)</div>
+          <canvas id="arenaChart" height="260"></canvas>
+        </div>
+        <div class="chart-card full-width">
+          <div class="chart-title">Multi-Benchmark Profile — S-Tier Models</div>
+          <div class="chart-sub">Normalized scores across 6 benchmarks</div>
+          <canvas id="radarChart" height="360"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Math Performance (AIME 2025)</div>
+          <div class="chart-sub">Top 8 models by math benchmark score</div>
+          <canvas id="mathChart" height="260"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">SWE-bench Verified</div>
+          <div class="chart-sub">Real-world software engineering capability</div>
+          <canvas id="sweChart" height="260"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SPEED & COST VIEW ===== -->
+    <div class="view" id="view-speed">
+      <div class="section-header">
+        <div class="section-title">Speed & Cost Comparison</div>
+        <div class="section-meta">Inference performance and pricing per 1M tokens</div>
+      </div>
+      <div class="speed-grid" id="speedGrid"></div>
+
+      <div class="section-header" style="margin-top: var(--space-8)">
+        <div class="section-title">Efficiency Rankings</div>
+        <div class="section-meta">Top models by speed (tokens/sec) and cost</div>
+      </div>
+      <div class="bench-grid" id="efficiencyCards"></div>
+    </div>
+
+    <!-- ===== ABOUT VIEW ===== -->
+    <div class="view" id="view-about">
+      <div class="section-header">
+        <div class="section-title">Benchmark Guide</div>
+        <div class="section-meta">Understanding evaluation metrics</div>
+      </div>
+      <div class="about-grid" id="benchGuide"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ==================== DATA ====================
+const MODELS = [
+  {
+    rank: 1, name: "Kimi K2.5", org: "Moonshot AI", params: "1T (32B active)", tier: "S",
+    arena: 1447, humaneval: 99.0, gpqa: 87.6, aime: 96.1, swe: 76.8, math: 98.0, livecode: 85.0, mmlu: 92.0, ifeval: 94.0,
+    context: "262K", inputCost: 0.60, outputCost: 2.50, speed: 45, latency: 1.2, license: "Open Weight",
+    bestFor: "Coding, Math, Reasoning, Instructions"
+  },
+  {
+    rank: 2, name: "GLM-5", org: "Zhipu AI", params: "744B (40B active)", tier: "S",
+    arena: 1451, humaneval: null, gpqa: 86.0, aime: 84.0, swe: 77.8, math: null, livecode: 52.0, mmlu: null, ifeval: 88.0,
+    context: "200K", inputCost: null, outputCost: null, speed: null, latency: null, license: "Open Weight",
+    bestFor: "Coding Agents, Conversation, Science"
+  },
+  {
+    rank: 3, name: "GLM-4.7", org: "Zhipu AI", params: "355B", tier: "S",
+    arena: 1445, humaneval: 94.2, gpqa: 85.7, aime: 95.7, swe: 73.8, math: null, livecode: 84.9, mmlu: null, ifeval: 88.0,
+    context: "200K", inputCost: null, outputCost: null, speed: null, latency: null, license: "Open Weight",
+    bestFor: "Coding, Instruction Following, Science"
+  },
+  {
+    rank: 4, name: "MiniMax M2.5", org: "MiniMax", params: "230B", tier: "S",
+    arena: null, humaneval: 89.6, gpqa: 85.2, aime: 86.3, swe: 80.2, math: null, livecode: null, mmlu: null, ifeval: 87.5,
+    context: "205K", inputCost: null, outputCost: null, speed: null, latency: null, license: "Open Weight",
+    bestFor: "Software Engineering, Bug Fixing"
+  },
+  {
+    rank: 5, name: "DeepSeek V3.2", org: "DeepSeek", params: "685B (37B active)", tier: "S",
+    arena: 1421, humaneval: null, gpqa: 79.9, aime: 89.3, swe: 67.8, math: null, livecode: 74.1, mmlu: null, ifeval: null,
+    context: "128K", inputCost: 0.27, outputCost: 1.10, speed: 33, latency: 4.0, license: "MIT",
+    bestFor: "General Reasoning, Agentic Workflows"
+  },
+  {
+    rank: 6, name: "Step-3.5-Flash", org: "Stepfun", params: "196B", tier: "S",
+    arena: null, humaneval: null, gpqa: null, aime: 97.3, swe: 74.4, math: null, livecode: 86.4, mmlu: null, ifeval: null,
+    context: "128K", inputCost: null, outputCost: null, speed: null, latency: null, license: "Open Weight",
+    bestFor: "Math, Competitive Coding"
+  },
+  {
+    rank: 7, name: "Qwen 3.5", org: "Alibaba", params: "397B", tier: "A",
+    arena: null, humaneval: null, gpqa: 88.4, aime: null, swe: 76.4, math: null, livecode: 83.6, mmlu: 88.5, ifeval: 92.6,
+    context: "128K", inputCost: null, outputCost: null, speed: null, latency: null, license: "Open Weight",
+    bestFor: "Scientific Reasoning, Instructions"
+  },
+  {
+    rank: 8, name: "MiMo-V2-Flash", org: "Xiaomi", params: "309B", tier: "A",
+    arena: 1401, humaneval: 84.8, gpqa: 83.7, aime: 94.1, swe: 73.4, math: null, livecode: 80.6, mmlu: 86.7, ifeval: null,
+    context: "262K", inputCost: null, outputCost: null, speed: null, latency: null, license: "Open Weight",
+    bestFor: "Balanced Coding & Reasoning"
+  },
+  {
+    rank: 9, name: "Qwen 3 235B", org: "Alibaba", params: "235B", tier: "A",
+    arena: 1422, humaneval: null, gpqa: 81.1, aime: 92.3, swe: null, math: null, livecode: 74.1, mmlu: null, ifeval: 87.8,
+    context: "128K", inputCost: null, outputCost: null, speed: null, latency: null, license: "Open Weight",
+    bestFor: "Cost-efficient Reasoning & Chat"
+  },
+  {
+    rank: 10, name: "DeepSeek R1", org: "DeepSeek", params: "671B (37B active)", tier: "A",
+    arena: 1398, humaneval: 90.2, gpqa: 71.5, aime: 87.5, swe: 49.2, math: 97.3, livecode: 65.9, mmlu: 90.8, ifeval: null,
+    context: "128K", inputCost: 0.55, outputCost: 2.19, speed: 24, latency: 4.0, license: "MIT",
+    bestFor: "Mathematics, General Reasoning"
+  },
+  {
+    rank: 11, name: "GPT-oss 120B", org: "OpenAI", params: "120B", tier: "B",
+    arena: 1354, humaneval: null, gpqa: 80.9, aime: 97.9, swe: 62.4, math: null, livecode: 60.0, mmlu: 90.0, ifeval: null,
+    context: "131K", inputCost: 0.15, outputCost: 0.60, speed: 260, latency: 8.1, license: "Apache 2.0",
+    bestFor: "General Knowledge, Science QA"
+  },
+  {
+    rank: 12, name: "Mistral Large", org: "Mistral", params: "675B", tier: "B",
+    arena: 1416, humaneval: 92.0, gpqa: 43.9, aime: 88.0, swe: null, math: 93.6, livecode: 82.8, mmlu: null, ifeval: null,
+    context: "256K", inputCost: null, outputCost: null, speed: null, latency: null, license: "Open Weight",
+    bestFor: "Code Generation, Math"
+  },
+  {
+    rank: 13, name: "Nemotron Ultra 253B", org: "Nvidia", params: "253B", tier: "B",
+    arena: null, humaneval: null, gpqa: 76.0, aime: null, swe: null, math: null, livecode: null, mmlu: null, ifeval: 89.5,
+    context: "128K", inputCost: null, outputCost: null, speed: null, latency: null, license: "Open Weight",
+    bestFor: "Science Reasoning, Instructions"
+  },
+  {
+    rank: 14, name: "Llama 4 Maverick", org: "Meta", params: "400B+ (17B active)", tier: "B",
+    arena: null, humaneval: null, gpqa: null, aime: null, swe: null, math: null, livecode: null, mmlu: null, ifeval: null,
+    context: "10M", inputCost: 0.20, outputCost: 0.60, speed: 126, latency: 0.45, license: "Restricted",
+    bestFor: "Multimodal, Long Context, Multilingual"
+  },
+  {
+    rank: 15, name: "Gemma 3 27B", org: "Google", params: "27B (Dense)", tier: "B",
+    arena: null, humaneval: null, gpqa: null, aime: null, swe: null, math: null, livecode: null, mmlu: null, ifeval: null,
+    context: "128K", inputCost: 0.07, outputCost: 0.07, speed: 59, latency: 0.72, license: "Apache 2.0",
+    bestFor: "Edge Deployment, Cost Efficiency"
+  }
+];
+
+const BENCHMARKS_META = [
+  { key: "gpqa", label: "GPQA Diamond", tag: "Reasoning", desc: "Graduate-level science questions across physics, chemistry & biology. Tests advanced multi-step reasoning.", color: "#3fa8b0" },
+  { key: "humaneval", label: "HumanEval", tag: "Coding", desc: "Python programming problems evaluated by functional correctness. Gold standard for code generation.", color: "#6daa45" },
+  { key: "aime", label: "AIME 2025", tag: "Math", desc: "American Invitational Math Examination 2025. Measures multi-step mathematical problem solving.", color: "#e8af34" },
+  { key: "swe", label: "SWE-bench Verified", tag: "Engineering", desc: "Real GitHub issues that must be resolved end-to-end. Measures agentic software engineering ability.", color: "#a86fdf" },
+  { key: "math", label: "MATH-500", tag: "Math", desc: "500 competition-level math problems from AMC, AIME, and above. Tests rigorous mathematical reasoning.", color: "#5591c7" },
+  { key: "livecode", label: "LiveCodeBench", tag: "Coding", desc: "Real-world competitive coding problems. More challenging than HumanEval, tests true coding depth.", color: "#dd6974" },
+];
+
+const SPEED_DATA = [
+  { name: "Llama 4 Scout", org: "Meta", speed: 2600, latency: 0.33, context: "10M", input: 0.11, output: 0.34 },
+  { name: "GPT-oss 20B", org: "OpenAI", speed: 564, latency: 4.0, context: "131K", input: 0.08, output: 0.35 },
+  { name: "GPT-oss 120B", org: "OpenAI", speed: 260, latency: 8.1, context: "131K", input: 0.15, output: 0.60 },
+  { name: "Llama 4 Maverick", org: "Meta", speed: 126, latency: 0.45, context: "10M", input: 0.20, output: 0.60 },
+  { name: "Kimi K2 Thinking", org: "Moonshot", speed: 79, latency: 25.3, context: "256K", input: 0.60, output: 2.50 },
+  { name: "Gemma 3 27B", org: "Google", speed: 59, latency: 0.72, context: "128K", input: 0.07, output: 0.07 },
+  { name: "DeepSeek V3.2", org: "DeepSeek", speed: 33, latency: 4.0, context: "128K", input: 0.27, output: 1.10 },
+  { name: "DeepSeek R1", org: "DeepSeek", speed: 24, latency: 4.0, context: "128K", input: 0.55, output: 2.19 },
+  { name: "Kimi K2.5", org: "Moonshot", speed: 45, latency: 1.2, context: "256K", input: 0.60, output: 2.50 },
+];
+
+// ==================== UTILS ====================
+function fmt(val, suffix='%') {
+  if (val === null || val === undefined) return '<span class="score-na">—</span>';
+  const n = parseFloat(val);
+  const cls = n >= 85 ? 'score-high' : n >= 70 ? 'score-mid' : 'score-low';
+  return `<span class="${cls}">${n.toFixed(1)}${suffix}</span>`;
+}
+function fmtELO(val) {
+  if (!val) return '<span class="score-na">—</span>';
+  const cls = val >= 1440 ? 'score-high' : val >= 1400 ? 'score-mid' : 'score-low';
+  return `<span class="${cls} score-cell">${val}</span>`;
+}
+function fmtBar(val, max=100) {
+  if (!val) return '<span class="score-na">—</span>';
+  const pct = (val/max*100).toFixed(1);
+  return `<div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-bar-fill" style="width:${pct}%"></div></div><span class="score-cell">${val.toFixed(1)}%</span></div>`;
+}
+
+// ==================== STATE ====================
+let sortKey = 'arena', sortDir = -1;
+let tierFilter = 'all', orgFilter = 'all';
+let searchQ = '';
+
+// ==================== TOP 5 ====================
+function renderTop5() {
+  const top5 = [...MODELS].sort((a,b) => (b.arena||0)-(a.arena||0)).slice(0,5);
+  const tbody = document.getElementById('top5tbody');
+  tbody.innerHTML = top5.map((m,i) => `
+    <tr>
+      <td class="rank-cell rank-${i+1}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+      <td class="model-cell">
+        <div class="model-name">${m.name}</div>
+        <div class="model-org">${m.org}</div>
+        <div class="model-params">${m.params}</div>
+      </td>
+      <td><span class="tier-badge tier-${m.tier}">${m.tier}</span></td>
+      <td>${fmtELO(m.arena)}</td>
+      <td class="score-cell">${m.humaneval ? m.humaneval.toFixed(1)+'%' : '—'}</td>
+      <td class="score-cell">${m.gpqa ? m.gpqa.toFixed(1)+'%' : '—'}</td>
+      <td class="score-cell">${m.aime ? m.aime.toFixed(1)+'%' : '—'}</td>
+      <td class="score-cell">${m.swe ? m.swe.toFixed(1)+'%' : '—'}</td>
+      <td><span style="font-size:var(--text-xs);color:var(--color-primary);font-family:var(--font-mono)">${m.context}</span></td>
+      <td><span class="license-pill ${m.license==='MIT'||m.license==='Apache 2.0'?'license-mit':m.license==='Restricted'?'license-restrictive':'license-open'}">${m.license}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ==================== CATEGORY LEADERS ====================
+function renderCategoryLeaders() {
+  const categories = [
+    { label: "🏆 Best Arena ELO", key: 'arena', tag: 'Chat', color: '#3fa8b0', suffix: '' },
+    { label: "💻 Best HumanEval", key: 'humaneval', tag: 'Coding', color: '#6daa45', suffix: '%' },
+    { label: "🔬 Best GPQA ◆", key: 'gpqa', tag: 'Reasoning', color: '#e8af34', suffix: '%' },
+    { label: "📐 Best AIME 2025", key: 'aime', tag: 'Math', color: '#5591c7', suffix: '%' },
+    { label: "🛠 Best SWE-bench", key: 'swe', tag: 'Engineering', color: '#a86fdf', suffix: '%' },
+    { label: "📊 Best MATH-500", key: 'math', tag: 'Math', color: '#dd6974', suffix: '%' },
+  ];
+
+  const container = document.getElementById('categoryLeaders');
+  container.innerHTML = categories.map(cat => {
+    const sorted = MODELS.filter(m => m[cat.key]).sort((a,b) => b[cat.key]-a[cat.key]).slice(0,5);
+    const max = sorted[0][cat.key];
+    return `
+      <div class="bench-card">
+        <div class="bench-card-header">
+          <div>
+            <div class="bench-card-title">${cat.label}</div>
+            <div class="bench-card-desc">Top 5 performers</div>
+          </div>
+          <span class="bench-tag">${cat.tag}</span>
+        </div>
+        <div class="bar-list">
+          ${sorted.map((m,i) => `
+            <div class="bar-item">
+              <div class="bar-model-name">${m.name}</div>
+              <div class="bar-track"><div class="bar-fill" style="width:${(m[cat.key]/max*100).toFixed(1)}%;background:${cat.color}"></div></div>
+              <div class="bar-score">${cat.key==='arena' ? m[cat.key] : m[cat.key].toFixed(1)+cat.suffix}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ==================== MAIN TABLE ====================
+function renderMainTable() {
+  let rows = [...MODELS];
+  if (tierFilter !== 'all') rows = rows.filter(m => m.tier === tierFilter);
+  if (orgFilter !== 'all') rows = rows.filter(m => m.org.toLowerCase().includes(orgFilter.toLowerCase()));
+  if (searchQ) rows = rows.filter(m => m.name.toLowerCase().includes(searchQ) || m.org.toLowerCase().includes(searchQ));
+
+  if (sortKey !== 'name') {
+    rows.sort((a,b) => sortDir * ((b[sortKey]||0) - (a[sortKey]||0)));
+  } else {
+    rows.sort((a,b) => sortDir * a.name.localeCompare(b.name));
+  }
+
+  const tbody = document.getElementById('mainTbody');
+  tbody.innerHTML = rows.map((m,i) => `
+    <tr>
+      <td class="rank-cell rank-${i<3?i+1:''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+      <td class="model-cell">
+        <div class="model-name">${m.name}</div>
+        <div class="model-org">${m.org}</div>
+        <div class="model-params">${m.params}</div>
+      </td>
+      <td><span class="tier-badge tier-${m.tier}">${m.tier}</span></td>
+      <td>${fmtELO(m.arena)}</td>
+      <td>${fmtBar(m.humaneval, 100)}</td>
+      <td>${fmtBar(m.gpqa, 100)}</td>
+      <td>${fmtBar(m.aime, 100)}</td>
+      <td>${fmtBar(m.swe, 100)}</td>
+      <td>${fmtBar(m.math, 100)}</td>
+      <td>${fmtBar(m.livecode, 100)}</td>
+      <td><span style="font-size:var(--text-xs);color:var(--color-primary);font-family:var(--font-mono)">${m.context}</span></td>
+      <td><span class="license-pill ${m.license==='MIT'||m.license==='Apache 2.0'?'license-mit':m.license==='Restricted'?'license-restrictive':'license-open'}">${m.license}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ==================== BENCHMARKS PAGE ====================
+function renderBenchmarkCards() {
+  const container = document.getElementById('benchmarkCards');
+  container.innerHTML = BENCHMARKS_META.map(bm => {
+    const sorted = MODELS.filter(m => m[bm.key]).sort((a,b) => b[bm.key]-a[bm.key]).slice(0,5);
+    const max = sorted[0]?.[bm.key] || 100;
+    return `
+      <div class="bench-card">
+        <div class="bench-card-header">
+          <div>
+            <div class="bench-card-title">${bm.label}</div>
+            <div class="bench-card-desc">${bm.desc}</div>
+          </div>
+          <span class="bench-tag">${bm.tag}</span>
+        </div>
+        <div class="bar-list">
+          ${sorted.map(m => `
+            <div class="bar-item">
+              <div class="bar-model-name">${m.name}</div>
+              <div class="bar-track"><div class="bar-fill" style="width:${(m[bm.key]/max*100).toFixed(1)}%;background:${bm.color}"></div></div>
+              <div class="bar-score">${m[bm.key].toFixed(1)}%</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ==================== SPEED CARDS ====================
+function renderSpeedCards() {
+  const grid = document.getElementById('speedGrid');
+  grid.innerHTML = SPEED_DATA.map(m => `
+    <div class="speed-card">
+      <div class="speed-header">
+        <div>
+          <div class="speed-model-name">${m.name}</div>
+          <div class="speed-model-org">${m.org}</div>
+        </div>
+      </div>
+      <div class="speed-row"><span class="speed-key">Speed</span><span class="speed-val highlight">${m.speed} tok/s</span></div>
+      <div class="speed-row"><span class="speed-key">Latency (TTFT)</span><span class="speed-val">${m.latency}s</span></div>
+      <div class="speed-row"><span class="speed-key">Context Window</span><span class="speed-val">${m.context}</span></div>
+      <div class="speed-row"><span class="speed-key">Input Cost / 1M</span><span class="speed-val">$${m.input}</span></div>
+      <div class="speed-row"><span class="speed-key">Output Cost / 1M</span><span class="speed-val">$${m.output}</span></div>
+    </div>
+  `).join('');
+
+  const eff = document.getElementById('efficiencyCards');
+  const fastest = [...SPEED_DATA].sort((a,b)=>b.speed-a.speed).slice(0,3);
+  const cheapest = [...SPEED_DATA].sort((a,b)=>a.input-b.input).slice(0,3);
+  const lowestLatency = [...SPEED_DATA].sort((a,b)=>a.latency-b.latency).slice(0,3);
+
+  eff.innerHTML = [
+    { title: "⚡ Fastest (Tokens/sec)", data: fastest, key: 'speed', suffix: ' tok/s', color: '#e8af34' },
+    { title: "💰 Cheapest (Input $/1M)", data: cheapest, key: 'input', suffix: '/1M', prefix: '$', color: '#6daa45' },
+    { title: "🕐 Lowest Latency (TTFT)", data: lowestLatency, key: 'latency', suffix: 's', color: '#3fa8b0' },
+  ].map(cat => {
+    const maxVal = Math.max(...cat.data.map(d=>d[cat.key]));
+    return `
+      <div class="bench-card">
+        <div class="bench-card-header">
+          <div class="bench-card-title">${cat.title}</div>
+        </div>
+        <div class="bar-list">
+          ${cat.data.map((m,i) => {
+            const barPct = cat.key === 'latency' || cat.key === 'input'
+              ? (1 - (m[cat.key]-Math.min(...cat.data.map(d=>d[cat.key]))) / (maxVal||1)) * 100
+              : (m[cat.key]/maxVal*100);
+            return `
+              <div class="bar-item">
+                <div class="bar-model-name">${m.name}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${Math.max(barPct,10).toFixed(1)}%;background:${cat.color}"></div></div>
+                <div class="bar-score" style="width:60px">${cat.prefix||''}${m[cat.key]}${cat.suffix}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ==================== ABOUT PAGE ====================
+function renderAbout() {
+  const guide = [
+    { name: "GPQA Diamond", full: "Graduate-Level Google-Proof Q&A", type: "Reasoning", icon: "🔬", desc: "Expert-curated questions across advanced physics, chemistry, and biology. Requires PhD-level knowledge that can't be easily googled. Scores above 80% indicate frontier-level scientific reasoning." },
+    { name: "HumanEval", full: "Functional Code Correctness", type: "Coding", icon: "💻", desc: "Python programming benchmarks evaluated by running test suites. Pass@1 measures whether the model's first attempt works. Scores above 90% indicate production-grade code generation." },
+    { name: "AIME 2025", full: "American Invitational Math Exam", type: "Math", icon: "📐", desc: "High-difficulty math competition problems. Tests multi-step reasoning, algebraic manipulation, and mathematical creativity. Scores above 85% are exceptional; human top students score 30-50%." },
+    { name: "SWE-bench Verified", full: "Software Engineering Benchmark", type: "Engineering", icon: "🛠", desc: "Real GitHub issues from popular Python repos that models must resolve end-to-end. Gold standard for agentic coding capability. Scores above 70% indicate true software engineering proficiency." },
+    { name: "MATH-500", full: "Competition Math Problems", type: "Math", icon: "∫", desc: "500 competition-level math problems from AMC, AIME, and beyond. Tests deep mathematical reasoning. Scores above 95% are world-class." },
+    { name: "LiveCodeBench", full: "Real-Time Coding Competition", type: "Coding", icon: "🏆", desc: "Competitive programming problems continuously updated to prevent data contamination. More realistic than HumanEval for evaluating actual coding depth in novel situations." },
+    { name: "Chatbot Arena ELO", full: "Human Preference Rating", type: "Chat", icon: "💬", desc: "Crowdsourced blind comparisons where humans rate model quality. ELO rating system. The gold standard for real-world conversational quality. Top open-source models now cluster around 1400-1451." },
+    { name: "IFEval", full: "Instruction Following Evaluation", type: "Instructions", icon: "📋", desc: "Measures how precisely models follow complex, structured instructions with verifiable outputs. Critical for RAG pipelines, structured generation, and multi-agent orchestration." },
+  ];
+
+  const container = document.getElementById('benchGuide');
+  container.innerHTML = guide.map(g => `
+    <div class="about-card">
+      <h3>${g.icon} ${g.name}</h3>
+      <p style="font-size:var(--text-xs);color:var(--color-primary);font-weight:600;margin-bottom:var(--space-2)">${g.full} · ${g.type}</p>
+      <p>${g.desc}</p>
+    </div>
+  `).join('');
+}
+
+// ==================== CHARTS ====================
+let chartsInit = false;
+
+function getChartColors() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return {
+    grid: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+    text: dark ? '#7a7974' : '#6b6a66',
+    primary: dark ? '#3fa8b0' : '#01696f',
+  };
+}
+
+function initCharts() {
+  if (chartsInit) return;
+  chartsInit = true;
+
+  const cc = getChartColors();
+  const defaults = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: cc.text, font: { family: 'Inter', size: 11 } } } }
+  };
+
+  // Scatter: GPQA vs HumanEval
+  const scatterData = MODELS.filter(m => m.gpqa && m.humaneval).map(m => ({
+    x: m.humaneval, y: m.gpqa, label: m.name
+  }));
+  new Chart(document.getElementById('scatterChart'), {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'Models',
+        data: scatterData,
+        backgroundColor: cc.primary,
+        pointRadius: 6,
+        pointHoverRadius: 9,
+      }]
+    },
+    options: {
+      ...defaults,
+      plugins: {
+        ...defaults.plugins,
+        tooltip: {
+          callbacks: {
+            label: ctx => `${scatterData[ctx.dataIndex].label}: HumanEval ${ctx.parsed.x}% | GPQA ${ctx.parsed.y}%`
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: 'HumanEval (%)', color: cc.text }, grid: { color: cc.grid }, ticks: { color: cc.text } },
+        y: { title: { display: true, text: 'GPQA Diamond (%)', color: cc.text }, grid: { color: cc.grid }, ticks: { color: cc.text } }
+      }
+    }
+  });
+
+  // Arena ELO bar
+  const arenaModels = MODELS.filter(m=>m.arena).sort((a,b)=>b.arena-a.arena).slice(0,10);
+  new Chart(document.getElementById('arenaChart'), {
+    type: 'bar',
+    data: {
+      labels: arenaModels.map(m=>m.name),
+      datasets: [{
+        label: 'Arena ELO',
+        data: arenaModels.map(m=>m.arena),
+        backgroundColor: arenaModels.map((m,i) => i===0?cc.primary:`${cc.primary}88`),
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      ...defaults,
+      indexAxis: 'y',
+      scales: {
+        x: { min: 1350, grid: { color: cc.grid }, ticks: { color: cc.text } },
+        y: { grid: { color: cc.grid }, ticks: { color: cc.text, font:{size:10} } }
+      }
+    }
+  });
+
+  // Radar chart — S-tier models
+  const sTier = MODELS.filter(m=>m.tier==='S' && [m.gpqa,m.humaneval,m.aime,m.swe,m.livecode].some(v=>v));
+  const radarColors = ['rgba(63,168,176,0.8)','rgba(109,170,69,0.8)','rgba(232,175,52,0.8)','rgba(168,111,223,0.8)','rgba(85,145,199,0.8)','rgba(221,105,116,0.8)'];
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['GPQA ◆', 'HumanEval', 'AIME 2025', 'SWE-bench', 'LiveCode', 'MATH-500'],
+      datasets: sTier.map((m,i) => ({
+        label: m.name,
+        data: [m.gpqa||0, m.humaneval||0, m.aime||0, m.swe||0, m.livecode||0, m.math||0],
+        borderColor: radarColors[i],
+        backgroundColor: radarColors[i].replace('0.8','0.1'),
+        borderWidth: 2,
+        pointBackgroundColor: radarColors[i],
+        pointRadius: 4
+      }))
+    },
+    options: {
+      ...defaults,
+      scales: {
+        r: {
+          min: 0, max: 100,
+          grid: { color: cc.grid },
+          angleLines: { color: cc.grid },
+          ticks: { display: false },
+          pointLabels: { color: cc.text, font: { size: 11 } }
+        }
+      }
+    }
+  });
+
+  // Math chart
+  const mathModels = MODELS.filter(m=>m.aime).sort((a,b)=>b.aime-a.aime).slice(0,8);
+  new Chart(document.getElementById('mathChart'), {
+    type: 'bar',
+    data: {
+      labels: mathModels.map(m=>m.name),
+      datasets: [{
+        label: 'AIME 2025 (%)',
+        data: mathModels.map(m=>m.aime),
+        backgroundColor: mathModels.map((m,i)=>i===0?'#e8af34':'#e8af3488'),
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      ...defaults,
+      indexAxis: 'y',
+      scales: {
+        x: { min: 70, max: 100, grid: { color: cc.grid }, ticks: { color: cc.text } },
+        y: { grid: { color: cc.grid }, ticks: { color: cc.text, font:{size:10} } }
+      }
+    }
+  });
+
+  // SWE chart
+  const sweModels = MODELS.filter(m=>m.swe).sort((a,b)=>b.swe-a.swe).slice(0,7);
+  new Chart(document.getElementById('sweChart'), {
+    type: 'bar',
+    data: {
+      labels: sweModels.map(m=>m.name),
+      datasets: [{
+        label: 'SWE-bench Verified (%)',
+        data: sweModels.map(m=>m.swe),
+        backgroundColor: sweModels.map((m,i)=>i===0?'#a86fdf':'#a86fdf88'),
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      ...defaults,
+      indexAxis: 'y',
+      scales: {
+        x: { min: 40, max: 85, grid: { color: cc.grid }, ticks: { color: cc.text } },
+        y: { grid: { color: cc.grid }, ticks: { color: cc.text, font:{size:10} } }
+      }
+    }
+  });
+}
+
+// ==================== NAVIGATION ====================
+function switchView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-'+viewId).classList.add('active');
+  document.querySelector(`[data-view="${viewId}"]`)?.classList.add('active');
+  const titles = { dashboard: 'Dashboard', leaderboard: 'Full Leaderboard', benchmarks: 'Benchmarks', charts: 'Radar Charts', speed: 'Speed & Cost', about: 'Benchmark Guide' };
+  document.getElementById('pageTitle').textContent = titles[viewId] || viewId;
+  if (viewId === 'charts') initCharts();
+}
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    switchView(item.dataset.view);
+    document.getElementById('sidebar').classList.remove('open');
+  });
+});
+
+// Mobile menu
+document.getElementById('mobileMenu').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+// ==================== SORT ====================
+document.querySelectorAll('[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sort;
+    if (sortKey === key) sortDir *= -1;
+    else { sortKey = key; sortDir = -1; }
+    document.querySelectorAll('[data-sort] .sort-arrow').forEach(a => { a.classList.remove('active'); a.textContent = '↕'; });
+    const arrow = th.querySelector('.sort-arrow');
+    if (arrow) { arrow.classList.add('active'); arrow.textContent = sortDir === -1 ? '↓' : '↑'; }
+    th.classList.add('sorted');
+    renderMainTable();
+  });
+});
+
+// ==================== FILTERS ====================
+document.querySelectorAll('[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const group = btn.dataset.filter;
+    document.querySelectorAll(`[data-filter="${group}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (group === 'tier') tierFilter = btn.dataset.value;
+    if (group === 'org') orgFilter = btn.dataset.value;
+    renderMainTable();
+  });
+});
+
+// ==================== SEARCH ====================
+document.getElementById('globalSearch').addEventListener('input', e => {
+  searchQ = e.target.value.toLowerCase();
+  renderMainTable();
+  if (searchQ && document.getElementById('view-leaderboard').classList.contains('active') === false) {
+    switchView('leaderboard');
+  }
+});
+
+// ==================== THEME ====================
+(function() {
+  const toggle = document.getElementById('themeToggle');
+  const html = document.documentElement;
+  let theme = 'dark';
+  function setTheme(t) {
+    theme = t;
+    html.setAttribute('data-theme', t);
+    toggle.innerHTML = t === 'dark'
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    toggle.setAttribute('aria-label', `Switch to ${t === 'dark' ? 'light' : 'dark'} mode`);
+  }
+  toggle.addEventListener('click', () => setTheme(theme === 'dark' ? 'light' : 'dark'));
+  setTheme(theme);
+})();
+
+// ==================== EXPORT ====================
+function exportCSV() {
+  const headers = ['Rank','Model','Org','Params','Tier','Arena ELO','HumanEval','GPQA Diamond','AIME 2025','SWE-bench','MATH-500','LiveCode','Context','License'];
+  const rows = MODELS.map(m => [m.rank, m.name, m.org, m.params, m.tier, m.arena||'', m.humaneval||'', m.gpqa||'', m.aime||'', m.swe||'', m.math||'', m.livecode||'', m.context, m.license]);
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'oss-llm-leaderboard-2026.csv';
+  a.click();
+}
+
+// ==================== INIT ====================
+renderTop5();
+renderCategoryLeaders();
+renderMainTable();
+renderBenchmarkCards();
+renderSpeedCards();
+renderAbout();
+</script>
+</body>
+</html>
